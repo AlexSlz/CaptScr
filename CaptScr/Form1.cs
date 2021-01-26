@@ -19,21 +19,38 @@ namespace CaptScr
         [DllImport("user32.dll")]
         public static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vlc);
 
-
-        Graphics _graphics;
-        Pen _pen = new Pen(Color.White, 2);
+        private Bitmap _bitmap;
+        private Graphics _graphics;
+        private Pen _pen = new Pen(Color.White, 2);
         private int X0, Y0, X1, Y1;
 
-
-        void ScreenShotArea()
+        private Rectangle save_hitbox;
+        private Rectangle hitbox;
+        bool drag = false;
+        private PosSizableRect nodeSelected = PosSizableRect.None;
+        private enum PosSizableRect
         {
-            Bitmap _bitmap = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
+            LeftUp,
+            RightBottom,
+            None
+        };
+
+
+        private void Open_Screenshot_Capt()
+        {
+            _bitmap = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
             _graphics = Graphics.FromImage(_bitmap);
             _graphics.CopyFromScreen(0, 0, 0, 0, _bitmap.Size);
-            pictureBox1.CreateGraphics().Dispose();
-            pictureBox1.Size = new Size(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
+            pictureBox1.Size = new Size(this.Size.Width, this.Size.Height);
             pictureBox1.Image = _bitmap;
             Show();
+        }
+        private void Close_Screenshot_Capt()
+        {
+            GC.Collect();
+            pictureBox1.Image = null;
+            pictureBox1.Refresh();
+            Hide();
         }
         /*void BlurDraw()
         {
@@ -58,11 +75,9 @@ namespace CaptScr
             if (m.Msg == 0x0312)
             {
                 int id = m.WParam.ToInt32();
-                switch (id)
+                if(id == 1 && pictureBox1.Image == null)
                 {
-                    case 1:
-                        ScreenShotArea();
-                        break;
+                    Open_Screenshot_Capt();
                 }
             }
             base.WndProc(ref m);
@@ -77,7 +92,7 @@ namespace CaptScr
         {
             if (e.Button == MouseButtons.Left)
             {
-                ScreenShotArea();
+                Open_Screenshot_Capt();
             }
         }
 
@@ -90,11 +105,16 @@ namespace CaptScr
         {
             if (e.KeyCode == Keys.Escape)
             {
-                Hide();
+                pictureBox1.Image = null;
+                Close_Screenshot_Capt();
             }
             if (e.Control && e.KeyCode == Keys.C)
             {
-                SaveImg();
+                copy_to_clipboard();
+            }
+            if (e.Control && e.KeyCode == Keys.S)
+            {
+                save_Pic();
             }
             if (e.KeyCode == Keys.Up && !e.Control && !e.Alt)
             {
@@ -134,61 +154,58 @@ namespace CaptScr
             {
                 if (_Power < 100)
                     _Power++;
-                power_text.Text = "Power: " + _Power.ToString();
+                set_hint("Power: " + _Power.ToString());
             }else
             if (e.Alt && e.KeyCode == Keys.Down)
             {
                 if(_Power > 1)
                     _Power--;
-                power_text.Text = "Power: " + _Power.ToString();
-            }
-            else
-            {
-                power_text.Text = "";
+                set_hint("Power: " + _Power.ToString());
             }
             TestIfRectInsideArea();
             pictureBox1.Refresh();
             Draw();
         }
-        private void SaveImg()
+        private void set_hint(string Text)
         {
-            if (hitbox.X > 0)
+            hint_text.Text = Text;
+        }
+        private Image crp_get()
+        {
+            pictureBox1.DrawToBitmap(_bitmap, pictureBox1.ClientRectangle);
+            Bitmap crpImg = new Bitmap(hitbox.Width, hitbox.Height);
+            for (int i = 0; i < hitbox.Width; i++)
             {
-                Bitmap _bitmap = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
-                pictureBox1.DrawToBitmap(_bitmap, pictureBox1.ClientRectangle);
-                Bitmap crpImg = new Bitmap(hitbox.Width, hitbox.Height);
-                for (int i = 0; i < hitbox.Width; i++)
+                for (int j = 0; j < hitbox.Height; j++)
                 {
-                    for (int j = 0; j < hitbox.Height; j++)
-                    {
-                        Color color = _bitmap.GetPixel(hitbox.X + i, hitbox.Y + j);
-                        crpImg.SetPixel(i, j, color);
-                    }
+                    Color color = _bitmap.GetPixel(hitbox.X + i, hitbox.Y + j);
+                    crpImg.SetPixel(i, j, color);
                 }
-                Clipboard.SetImage((Image)crpImg);
+            }
+            return crpImg;
+        }
+        private void copy_to_clipboard()
+        {
+            Image Img;
+            if (hitbox.Width > 2 && hitbox.Height > 2)
+            {
+                Clipboard.SetImage(crp_get());
             }
             else
             {
                 Clipboard.SetImage(pictureBox1.Image);
             }
-            Hide();
+            Close_Screenshot_Capt();
         }
-        Rectangle hitbox;
-        bool drag = false;
-        private PosSizableRect nodeSelected = PosSizableRect.None;
-        private enum PosSizableRect
+        private void save_Pic()
         {
-            LeftUp,
-            RightBottom,
-            None
-
-        };
+            MessageBox.Show("k");
+        }
 
         private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
             drag = false;
         }
-
         private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
         {
             ChangeCursor(e.Location);
@@ -238,8 +255,19 @@ namespace CaptScr
             _pen.EndCap = LineCap.RoundAnchor;
             _pen.DashPattern = new float[] { 8, 2 };
             SolidBrush TextClr = new SolidBrush(Color.Red);
-            Point _point = new Point(hitbox.X, hitbox.Y - 20);
-            pictureBox1.CreateGraphics().DrawString(hitbox.Width + " x " + hitbox.Height, DefaultFont, TextClr, _point);
+            Point _point;
+            if (hitbox.Y >= 25)
+            {
+               _point = new Point(hitbox.X + 10, hitbox.Y - 20);
+            }
+            else
+            {
+                _point = new Point(hitbox.X + 10, hitbox.Y + 10);
+            }
+            string hitbox_info = hitbox.Width + " x " + hitbox.Height;
+            Rectangle TextBg = new Rectangle(_point, TextRenderer.MeasureText(hitbox_info, DefaultFont));
+            pictureBox1.CreateGraphics().FillRectangle(Brushes.White, TextBg);
+            pictureBox1.CreateGraphics().DrawString(hitbox_info, DefaultFont, TextClr, _point);
             pictureBox1.CreateGraphics().DrawRectangle(_pen, hitbox);
             foreach (PosSizableRect pos in Enum.GetValues(typeof(PosSizableRect)))
             {
@@ -286,7 +314,7 @@ namespace CaptScr
         {
             nodeSelected = PosSizableRect.None;
             nodeSelected = GetNodeSelectable(e.Location);
-            if (hitbox.Contains(new Point(e.X, e.Y)))
+            if (hitbox.Contains(e.Location) || nodeSelected != PosSizableRect.None)
             {
                 drag = true;
                 if (e.Button == MouseButtons.Left)
@@ -304,11 +332,28 @@ namespace CaptScr
 
         private void pictureBox1_DoubleClick(object sender, EventArgs e)
         {
-            hitbox.Width = Screen.PrimaryScreen.Bounds.Width;
-            hitbox.Height = Screen.PrimaryScreen.Bounds.Height;
-            hitbox.X = 0;
-            hitbox.Y = 0;
-            pictureBox1.Refresh();
+            if (hitbox.Width > (Screen.PrimaryScreen.Bounds.Width - 100) && hitbox.Height > (Screen.PrimaryScreen.Bounds.Height - 100))
+            {
+                hitbox.Width = save_hitbox.Width;
+                hitbox.X = save_hitbox.X;
+                hitbox.Height = save_hitbox.Height;
+                hitbox.Y = save_hitbox.Y;
+                pictureBox1.Refresh();
+            }
+            else
+            {
+                save_hitbox = hitbox;
+                hitbox.Width = Screen.PrimaryScreen.Bounds.Width;
+                hitbox.Height = Screen.PrimaryScreen.Bounds.Height;
+                hitbox.X = 0;
+                hitbox.Y = 0;
+                pictureBox1.Refresh();
+            }
+        }
+
+        private void сделатьСкриншотToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Open_Screenshot_Capt();
         }
 
         private PosSizableRect GetNodeSelectable(Point p)

@@ -38,7 +38,7 @@ namespace CaptScr
             this.настройкиToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.закрытьToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.power_text = new System.Windows.Forms.Label();
+            this.hint_text = new System.Windows.Forms.Label();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -46,7 +46,7 @@ namespace CaptScr
             // Tray
             // 
             this.Tray.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info;
-            this.Tray.BalloonTipText = "Welcome, Ctrl + PrintScreen";
+            this.Tray.BalloonTipText = "Если программа не работает я не виноват.....";
             this.Tray.BalloonTipTitle = "PUK";
             this.Tray.ContextMenuStrip = this.contextMenuStrip1;
             this.Tray.Icon = ((System.Drawing.Icon)(resources.GetObject("Tray.Icon")));
@@ -69,6 +69,7 @@ namespace CaptScr
             this.сделатьСкриншотToolStripMenuItem.Name = "сделатьСкриншотToolStripMenuItem";
             this.сделатьСкриншотToolStripMenuItem.Size = new System.Drawing.Size(235, 22);
             this.сделатьСкриншотToolStripMenuItem.Text = "Сделать скриншот";
+            this.сделатьСкриншотToolStripMenuItem.Click += new System.EventHandler(this.сделатьСкриншотToolStripMenuItem_Click);
             // 
             // записатьВидеоToolStripMenuItem
             // 
@@ -94,6 +95,7 @@ namespace CaptScr
             this.pictureBox1.Location = new System.Drawing.Point(0, 0);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(778, 467);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.pictureBox1.TabIndex = 1;
             this.pictureBox1.TabStop = false;
             this.pictureBox1.DoubleClick += new System.EventHandler(this.pictureBox1_DoubleClick);
@@ -101,14 +103,15 @@ namespace CaptScr
             this.pictureBox1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseMove);
             this.pictureBox1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseUp);
             // 
-            // power_text
+            // hint_text
             // 
-            this.power_text.AutoSize = true;
-            this.power_text.Location = new System.Drawing.Point(12, 9);
-            this.power_text.Name = "power_text";
-            this.power_text.Size = new System.Drawing.Size(55, 13);
-            this.power_text.TabIndex = 2;
-            this.power_text.Text = "Power: 10";
+            this.hint_text.AutoSize = true;
+            this.hint_text.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.hint_text.Location = new System.Drawing.Point(12, 9);
+            this.hint_text.Name = "hint_text";
+            this.hint_text.Size = new System.Drawing.Size(55, 13);
+            this.hint_text.TabIndex = 2;
+            this.hint_text.Text = "Power: 10";
             // 
             // Form1
             // 
@@ -117,14 +120,13 @@ namespace CaptScr
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(949, 561);
             this.ControlBox = false;
-            this.Controls.Add(this.power_text);
+            this.Controls.Add(this.hint_text);
             this.Controls.Add(this.pictureBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "Form1";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Made by Alex S.";
             this.TopMost = true;
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
@@ -146,7 +148,7 @@ namespace CaptScr
         private System.Windows.Forms.ToolStripMenuItem настройкиToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem закрытьToolStripMenuItem;
         private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.Label power_text;
+        private System.Windows.Forms.Label hint_text;
     }
 }
 
