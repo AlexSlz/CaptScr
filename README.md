@@ -1,4 +1,4 @@
 # CaptScr
 Simple screen capture in c#
-\n
+<br>
 Ctrl + PrtScrn = Make screenshot
